@@ -1,19 +1,53 @@
 import json
-import os
-import sys
+import discord
 import requests
+from discord.ext import commands
+from discord import app_commands
 import gspread
+import os
 
-def resource_path(relpath):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relpath)
+PREFIX = 'bet.'
+INTENTS = discord.Intents().all()
+bot = commands.Bot(command_prefix = PREFIX, intents = INTENTS)
+TOKEN = 'MTE3NDY3OTQ5NTc3MzUxOTk2Mw.G76s8L.Xmy-19JWj2n1fIpj_KFbZdMgmiUjSycDzbjD9I'
+limit = 0
+channel = 1175378219277496341
 
-sa = gspread.service_account(filename=resource_path("service_account.json"))
+sa = gspread.service_account(filename="service_account.json")
 sh = sa.open("Wyniki statystyk")
 wks = sh.worksheet("LIGI")
+
+def checkid(Data, team):
+    
+    url = "https://livescore6.p.rapidapi.com/matches/v2/list-by-date"
+
+    querystring = {"Category":"soccer","Date":f"{Data}","Timezone":"-7"}
+
+    headers = {
+        "X-RapidAPI-Key": "fb7333cf2fmsh68563e68f422bcep1a2071jsncb99c4caaf88",
+        "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers, params=querystring)  
+    data = json.loads(response.text)
+    for events in data["Stages"]:
+        try:
+            compid = events["CompId"]
+        except:
+            compid = 12 
+        for teams in events["Events"]:
+            team1 = teams["T1"]
+            team2 = teams["T2"]
+            id1 = team1[0]["ID"]
+            id2 = team2[0]["ID"]
+            name1 = team1[0]["Nm"]
+            name2 = team2[0]["Nm"]
+            if name1 == team or name2 == team:
+                # print(id1, id2)
+                # print(name1, name2)
+                # print(compid)
+                return (id1, id2, compid)
+
 
 def multicheck(Data):
     list1d = []
@@ -23,83 +57,202 @@ def multicheck(Data):
     querystring = {"Category":"soccer","Date":f"{Data}","Timezone":"-7"}
 
     headers = {
-	"X-RapidAPI-Key": "e97c4e8315mshb8683f3f9365d39p1c9e33jsnac8b822da9c5",
-	"X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+        "X-RapidAPI-Key": "fb7333cf2fmsh68563e68f422bcep1a2071jsncb99c4caaf88",
+        "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
     }
-
-    url1 = "https://livescore6.p.rapidapi.com/teams/get-table"
-    headers1 = {
-    "X-RapidAPI-Key": "e97c4e8315mshb8683f3f9365d39p1c9e33jsnac8b822da9c5",
-	"X-RapidAPI-Host": "livescore6.p.rapidapi.com"
-    }
-    
 
     response = requests.get(url, headers=headers, params=querystring)  
     dane = json.loads(response.text)
     for events in dane["Stages"]:
         for teams in events["Events"]:
             try:
-                if(events['CompId'] == '65' or events['CompId'] == '67' or events['CompId'] == '75' or events['CompId'] == '68' or events['CompId'] == '77'): 
-                    for team1 in teams['T1']:
-                        querystring1 = {"ID":f"{team1['ID']}","Type":"short"}
-                        tabela = requests.get(url1, headers=headers1, params=querystring1)
-                        tab = json.loads(tabela.text)
-                        for i in range(0, 3):
-                            lig1 = tab["LeagueTable"]["L"][0]["Tables"][0]["team"][i]['Tid']
-                            if(lig1==team1['ID']):
-                                rnk1 = tab["LeagueTable"]["L"][0]["Tables"][0]["team"][i]['rnk']
-                                id1 = team1['ID']
-                                break
-                    for team2 in teams['T2']:
-                        querystring1 = {"ID":f"{team2['ID']}","Type":"short"}
-                        tabela = requests.get(url1, headers=headers1, params=querystring1)
-                        tab = json.loads(tabela.text)
-                        for i in range(0, 3):
-                            lig2 = tab["LeagueTable"]["L"][0]["Tables"][0]["team"][i]['Tid']
-                            if(lig2==team2['ID']):
-                                rnk2 = tab["LeagueTable"]["L"][0]["Tables"][0]["team"][i]['rnk']
-                                id2 = team2['ID']
-                                break
-
-                    if(abs(int(rnk1)-int(rnk2))>=5):
-                        list1d.append(events['CompId'])
-                        list1d.append(tab['Snm'])
-                        list1d.append(id1)
-
-
-                        list1d.append(id2)
-
-            
-
-                        ids.append(list1d)
-                        list1d = []
+                list1d.append(events['CompId'])
             except:
-                pass    
+                list1d.append('12')
+                continue
+            for team1 in teams['T1']:
+                list1d.append(team1['ID'])
+
+            for team2 in teams['T2']:
+                list1d.append(team2['ID'])
+
+            ids.append(list1d)
+            list1d = []
     return(ids)
 
 
-def importdata(Data):
-    
+
+@bot.tree.command(name="check")
+@app_commands.describe(rok="Podaj rok meczu" ,miesiac="Podaj miesiac meczu", dzien="Podaj dzien meczu", team="podaj druzyne")
+async def check(
+    interaction: discord.Interaction,
+    rok: app_commands.Range[int, 1000, 9999],
+    miesiac: app_commands.Range[int, 1, 12],
+    dzien: app_commands.Range[int, 1, 31],
+    team: str
+):
+    if(miesiac<10 and len(str(miesiac))<2):
+        miesiac='0'+str(miesiac)
+    if(dzien<10 and len(str(dzien))<2):
+        dzien='0'+str(dzien)
+    Data=str(rok)+str(miesiac)+str(dzien)
+    check = checkid(Data, team)
+    if(check[2] == '12'):
+        await interaction.response.send("Nie posiadamy statystyk dla danego meczu(rozjebane api)")
     url = "https://livescore6.p.rapidapi.com/teams/get-team-stats"
     headers = {
-	"X-RapidAPI-Key": "a8559155bbmsh63f4aa4a13fdd64p1edaecjsn43b00d3bfa30",
-	"X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+        "X-RapidAPI-Key": "b737119a51mshe4651cd13badc03p18b663jsnab1f3e78a151",
+        "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+    }
+    querystring = {"ID":f"{check[0]}","CompId":f"{check[2]}"}
+    response = requests.get(url, headers=headers, params=querystring)
+    data = json.loads(response.text)
+    # print(data)
+    await interaction.channel.send(f'# {data["Pnm"]}')
+    prt = ''
+    try:
+        for events in data["statsGroup"]:
+            prt += f'## {events["name"]} \n\n'
+            for st in events["stats"]:
+                prt += f'### {st["name"]} \n'
+                try:
+                    prt += f'Ilość: {st["totalValue"]} Średnia: {st["pgValue"]} Ranga w lidze: {st["rank"]}\n'
+                except:
+                    prt += f'Ilość: {st["totalValue"]} Średnia: --- Ranga w lidze: {st["rank"]}\n'
+        await interaction.channel.send(f'{prt}')
+    except:
+        await interaction.channel.send(f"Nie posiadamy statystyk dla {check[3]} (rozjebane api)")                
+
+
+    querystring = {"ID":f"{check[1]}","CompId":f"{check[2]}"}
+    response = requests.get(url, headers=headers, params=querystring)
+    data = json.loads(response.text)
+    await interaction.channel.send(f'# {data["Pnm"]}')
+    prt = ''
+    try:
+        for events in data["statsGroup"]:
+            prt += f'## {events["name"]} \n\n'
+            for st in events["stats"]:
+                prt += f'### {st["name"]} \n'
+                try:
+                    prt += f'Ilość: {st["totalValue"]} Średnia: {st["pgValue"]} Ranga w lidze: {st["rank"]}\n'
+                except:
+                    prt += f'Ilość: {st["totalValue"]} Średnia: --- Ranga w lidze: {st["rank"]}\n'
+        await interaction.channel.send(f'{prt}')
+    except:
+        await interaction.channel.send(f"Nie posiadamy statystyk dla {check[4]} (rozjebane api)")
+
+@bot.tree.command(name="importdata")
+@app_commands.describe(rok="Podaj rok meczu" ,miesiac="Podaj miesiac meczu", dzien="Podaj dzien meczu", team="podaj druzyne")
+async def importdata(
+    interaction: discord.Interaction,
+    rok: app_commands.Range[int, 1000, 9999],
+    miesiac: app_commands.Range[int, 1, 12],
+    dzien: app_commands.Range[int, 1, 31],
+    team: str
+):
+    if(miesiac<10 and len(str(miesiac))<2):
+        miesiac='0'+str(miesiac)
+    if(dzien<10 and len(str(dzien))<2):
+        dzien='0'+str(dzien)
+    Data=str(rok)+str(miesiac)+str(dzien)
+    url = "https://livescore6.p.rapidapi.com/teams/get-team-stats"
+    headers = {
+        "X-RapidAPI-Key": "b737119a51mshe4651cd13badc03p18b663jsnab1f3e78a151",
+        "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+    }
+    check = checkid(Data, team)
+    if(check[2] == '12'):
+        await interaction.response.send("Nie posiadamy statystyk dla danego meczu(rozjebane api)")
+    querystring = {"ID":f"{check[0]}","CompId":f"{check[2]}"}
+    response = requests.get(url, headers=headers, params=querystring)
+    data = json.loads(response.text)
+    ostatnia = wks.acell('A1').value
+    mecz = data['Pnm']+'-'
+    strzaly = ''
+    rozne = ''
+    kartki = ''
+    for events in data["statsGroup"]:
+        if(events['name']== 'ATTACKING'):
+            for st in events["stats"]:
+                if(st['name'] == 'Shots'):
+                    strzaly = str(st['pgValue'])
+                if(st['name'] == 'Shots on target'):
+                    strzaly += '('+str(st['pgValue'])+')'
+                if(st['name'] == 'Corner Kicks'):
+                    rozne = str(st['pgValue'])
+        if(events['name']== 'DISCIPLINE'):
+            for st in events["stats"]:            
+                if(st['name'] == 'Total cards'):
+                    kartki = str(st['pgValue'])
+    wks.update_cell(ostatnia, 7, strzaly)
+    wks.update_cell(ostatnia, 8, rozne)
+    wks.update_cell(ostatnia, 9, kartki)
+
+
+
+    querystring = {"ID":f"{check[1]}","CompId":f"{check[2]}"}
+    response = requests.get(url, headers=headers, params=querystring)
+    data = json.loads(response.text)
+    mecz += data['Pnm']
+    strzaly = ''
+    rozne = ''
+    kartki = ''
+    wks.update_cell(ostatnia, 5, mecz)
+    for events in data["statsGroup"]:
+        if(events['name']== 'ATTACKING'):
+            for st in events["stats"]:
+                if(st['name'] == 'Shots'):
+                    strzaly = str(st['pgValue'])
+                if(st['name'] == 'Shots on target'):
+                    strzaly += '('+str(st['pgValue'])+')'
+                if(st['name'] == 'Corner Kicks'):
+                    rozne = str(st['pgValue'])
+        if(events['name']== 'DISCIPLINE'):
+            for st in events["stats"]:
+                if(st['name'] == 'Total cards'):
+                    kartki = str(st['pgValue'])
+    wks.update_cell(ostatnia, 10, strzaly)
+    wks.update_cell(ostatnia, 11, rozne)
+    wks.update_cell(ostatnia, 12, kartki)
+    wks.update(range_name='A1', values=int(ostatnia)+1)
+
+    await interaction.channel.send("Plik został zaktualizowany!")
+
+
+
+
+@bot.tree.command(name="multiimport")
+@app_commands.describe(rok="Podaj rok meczu" ,miesiac="Podaj miesiac meczu", dzien="Podaj dzien meczu")
+async def importdata(
+    interaction: discord.Interaction,
+    rok: app_commands.Range[int, 1000, 9999],
+    miesiac: app_commands.Range[int, 1, 12],
+    dzien: app_commands.Range[int, 1, 31],
+):
+    if(miesiac<10 and len(str(miesiac))<2):
+        miesiac='0'+str(miesiac)
+    if(dzien<10 and len(str(dzien))<2):
+        dzien='0'+str(dzien)
+    Data=str(rok)+str(miesiac)+str(dzien)
+    url = "https://livescore6.p.rapidapi.com/teams/get-team-stats"
+    headers = {
+        "X-RapidAPI-Key": "b737119a51mshe4651cd13badc03p18b663jsnab1f3e78a151",
+        "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
     }
     check = multicheck(Data)
     for i in range(len(check)):
         if(check[i][0] == '12'):
-            print("Nie posiadamy statystyk dla danego meczu(rozjebane api)")
+            await interaction.channel.send("Nie posiadamy statystyk dla danego meczu(rozjebane api)")
             continue
-        querystring = {"ID":f"{check[i][2]}","CompId":f"{check[i][0]}"}
+        querystring = {"ID":f"{check[i][1]}","CompId":f"{check[i][0]}"}
         response = requests.get(url, headers=headers, params=querystring)
         data = json.loads(response.text)
         ostatnia = wks.acell('A1').value
-        cells = wks.range("D"f"{ostatnia}:L"f"{ostatnia}")
         mecz = data['Pnm']+'-'
         strzaly = ''
         rozne = ''
         kartki = ''
-        
         try:
             for events in data["statsGroup"]:
                 if(events['name']== 'ATTACKING'):
@@ -114,25 +267,23 @@ def importdata(Data):
                     for st in events["stats"]:
                         if(st['name'] == 'Total cards'):
                             kartki = str(st['pgValue'])
-            cells[3].value = strzaly
-            cells[4].value = rozne
-            cells[5].value = kartki
+            wks.update_cell(ostatnia, 7, strzaly)
+            wks.update_cell(ostatnia, 8, rozne)
+            wks.update_cell(ostatnia, 9, kartki)
         except:
-            print("Requesty się skończyły skurwysynu!")
-        
+            pass
 
 
 
-        querystring = {"ID":f"{check[i][3]}","CompId":f"{check[i][0]}"}
+        querystring = {"ID":f"{check[i][2]}","CompId":f"{check[i][0]}"}
         response = requests.get(url, headers=headers, params=querystring)
         data = json.loads(response.text)
         mecz += data['Pnm']
         strzaly = ''
         rozne = ''
         kartki = ''
-        cells[0].value = check[i][1]
-        cells[1].value = mecz
         try:
+            wks.update_cell(ostatnia, 5, mecz)
             for events in data["statsGroup"]:
                 if(events['name']== 'ATTACKING'):
                     for st in events["stats"]:
@@ -146,23 +297,25 @@ def importdata(Data):
                     for st in events["stats"]:
                         if(st['name'] == 'Total cards'):
                             kartki = str(st['pgValue'])
-            cells[6].value = strzaly
-            cells[7].value = rozne
-            cells[8].value = kartki
-            wks.update_cells(cells)
-            wks.update_cell(1,1,int(ostatnia)+1)
+            wks.update_cell(ostatnia, 10, strzaly)
+            wks.update_cell(ostatnia, 11, rozne)
+            wks.update_cell(ostatnia, 12, kartki)
+            wks.update(range_name='A1', values=int(ostatnia)+1)
         except:
-            print("Requesty się skończyły skurwysynu!")
+            pass
 
-    print("Plik został zaktualizowany!")
+    await interaction.channel.send("Plik został zaktualizowany!")
 
-# check = multicheck(20231216)
-# print(check)
-while True:
-    importdata(input("Wypisz date: "))
 
-    print()
-    input("Kliknij aby kontunułować")
-    print()
-    print()
-    print()
+
+
+
+
+
+@bot.event
+async def on_ready():
+    await bot.tree.sync()
+    print("Ready!")
+
+bot.run(TOKEN)
+
