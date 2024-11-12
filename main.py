@@ -220,7 +220,10 @@ async def importdata(
     await interaction.channel.send("Plik został zaktualizowany!")
 
 
-
+##################################################################################
+##################################################################################
+##################################################################################
+##################################################################################
 
 @bot.tree.command(name="multiimport")
 @app_commands.describe(rok="Podaj rok meczu" ,miesiac="Podaj miesiac meczu", dzien="Podaj dzien meczu")
@@ -307,8 +310,34 @@ async def importdata(
     await interaction.channel.send("Plik został zaktualizowany!")
 
 
+##################################################################################
+##################################################################################
+##################################################################################
+##################################################################################
 
-
+@bot.tree.command(name="multiimport")
+@app_commands.describe(rok="Podaj rok meczu" ,miesiac="Podaj miesiac meczu", dzien="Podaj dzien meczu")
+async def importdata(
+    interaction: discord.Interaction,
+    rok: app_commands.Range[int, 1000, 9999],
+    miesiac: app_commands.Range[int, 1, 12],
+    dzien: app_commands.Range[int, 1, 31],
+):
+    if(miesiac<10 and len(str(miesiac))<2):
+        miesiac='0'+str(miesiac)
+    if(dzien<10 and len(str(dzien))<2):
+        dzien='0'+str(dzien)
+    Data=str(rok)+str(miesiac)+str(dzien)
+    url = "https://livescore6.p.rapidapi.com/teams/get-team-stats"
+    headers = {
+        "X-RapidAPI-Key": "b737119a51mshe4651cd13badc03p18b663jsnab1f3e78a151",
+        "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+    }
+    check2 = multicheck(Data)
+    for i in range(len(check2)):
+        if(check[i][0] == '12'):
+            await interaction.channel.send("Nie posiadamy statystyk dla danego meczu(rozjebane api)")
+            continue
 
 
 
@@ -316,6 +345,7 @@ async def importdata(
 async def on_ready():
     await bot.tree.sync()
     print("Ready!")
+    
 
 bot.run(TOKEN)
 
