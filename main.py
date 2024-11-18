@@ -168,8 +168,8 @@ def szukanie(Data):
     querystring = {"Category":"soccer","Date":f"{Data}","Timezone":"-7"}
 
     headers = {
-	"X-RapidAPI-Key": "e97c4e8315mshb8683f3f9365d39p1c9e33jsnac8b822da9c5",
-	"X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+	    "X-RapidAPI-Key": "e97c4e8315mshb8683f3f9365d39p1c9e33jsnac8b822da9c5",
+        "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers, params=querystring)  
@@ -186,8 +186,8 @@ def szukanie(Data):
                 querystring2 = {"Category":"soccer","Ccd":f"{Ccd}","Scd":f"{Scd}","Timezone":"-7"}
                 url2 = "https://livescore6.p.rapidapi.com/matches/v2/list-by-league"
                 headers2 = {
-                "X-RapidAPI-Key": "a8559155bbmsh63f4aa4a13fdd64p1edaecjsn43b00d3bfa30",
-                "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+                    "X-RapidAPI-Key": "a8559155bbmsh63f4aa4a13fdd64p1edaecjsn43b00d3bfa30",
+                    "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
                 }
                 response2 = requests.get(url2, headers=headers2, params=querystring2)
                 statystyki = json.loads(response2.text)
@@ -216,8 +216,8 @@ def szukanie(Data):
                                     url3 = "https://livescore6.p.rapidapi.com/matches/v2/get-statistics"
 
                                     headers3 = {
-                                    "X-RapidAPI-Key": "a8559155bbmsh63f4aa4a13fdd64p1edaecjsn43b00d3bfa30",
-                                    "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+                                        "x-rapidapi-key": "c0cdcdef80mshc6be2a405fd46bdp19b6a0jsn46d775938a6b",
+                                        "x-rapidapi-host": "livescore6.p.rapidapi.com"
                                     }
                                     
                                     querystring3 = {"Eid":f"{Eid2}","Category":"soccer"}
@@ -239,8 +239,8 @@ def szukanie(Data):
 
                                     url3 = "https://livescore6.p.rapidapi.com/matches/v2/get-statistics"
                                     headers3 = {
-                                    "X-RapidAPI-Key": "a8559155bbmsh63f4aa4a13fdd64p1edaecjsn43b00d3bfa30",
-                                    "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+                                        "x-rapidapi-key": "2407aecf96msh7ce6584ba4c80bap1ad1f9jsnf68f23cb6231",
+                                        "x-rapidapi-host": "livescore6.p.rapidapi.com"
                                     }
                                     
                                     querystring3 = {"Eid":f"{Eid2}","Category":"soccer"}
@@ -264,8 +264,8 @@ def szukanie(Data):
                                     url3 = "https://livescore6.p.rapidapi.com/matches/v2/get-statistics"
 
                                     headers3 = {
-                                    "X-RapidAPI-Key": "a8559155bbmsh63f4aa4a13fdd64p1edaecjsn43b00d3bfa30",
-                                    "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+                                        "x-rapidapi-key": "cab57cb943msha12e2fe8f2b1e51p12c634jsn4e25e38d131b",
+                                        "x-rapidapi-host": "livescore6.p.rapidapi.com"
                                     }
                                     
                                     querystring3 = {"Eid":f"{Eid2}","Category":"soccer"}
@@ -288,8 +288,8 @@ def szukanie(Data):
                                     url3 = "https://livescore6.p.rapidapi.com/matches/v2/get-statistics"
 
                                     headers3 = {
-                                    "X-RapidAPI-Key": "a8559155bbmsh63f4aa4a13fdd64p1edaecjsn43b00d3bfa30",
-                                    "X-RapidAPI-Host": "livescore6.p.rapidapi.com"
+                                        "x-rapidapi-key": "02e6ed8605msh19d3aa305f9a302p1c5aabjsn70f9932c045a",
+                                        "x-rapidapi-host": "livescore6.p.rapidapi.com"
                                     }
                                     
                                     querystring3 = {"Eid":f"{Eid2}","Category":"soccer"}
