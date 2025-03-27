@@ -3,6 +3,7 @@ import os
 import sys
 import requests
 import gspread
+from sprawdzeniemeczu import dany_mecz
 
 def resource_path(relpath):
     try:
@@ -11,12 +12,11 @@ def resource_path(relpath):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relpath)
 
-sa = gspread.service_account(filename=resource_path("service_account.json"))
-sh = sa.open("Wyniki statystyk")
-bartek_arkusz = sh.worksheet("bartek")
+#sa = gspread.service_account(filename=resource_path("service_account.json"))
+#sh = sa.open("Wyniki statystyk")
+#bartek_arkusz = sh.worksheet("bartek")
 
-def ostatnie(liga_Ccd,liga_Scd,mecz_dnia, T1ID, T2ID):
-    for druzyna1 in mecz_dnia['T1']:
+def ostatnie_check(liga_Ccd,liga_Scd,mecz_dnia, T1ID, T2ID):
         url_ostatnie= "https://livescore6.p.rapidapi.com/matches/v2/list-by-league"
         querystring_ostatnie = {"Category":"soccer","Ccd":f"{liga_Ccd}","Scd":f"{liga_Scd}","Timezone":"-7"}
         headers_ostatnie = {
@@ -36,10 +36,13 @@ def ostatnie(liga_Ccd,liga_Scd,mecz_dnia, T1ID, T2ID):
                         mecz_wlidze-=1
                         if T1ID == mecz_dnia['T1'] or T1ID == mecz_dnia['T2']:
                             licznik_T1 -=1
-                            
-
-                        if T2ID == mecz_dnia['T1'] or T2ID == mecz_dnia['T2']:
+                            eid=i['Eid']
+                            dany_mecz(eid)
+                            i-=1
+                        elif T2ID == mecz_dnia['T1'] or T2ID == mecz_dnia['T2']:
                             licznik_T2 -=1
-
+                            eid=i['Eid']
+                            dany_mecz(eid)
+                            i-=1
                 else:
                     mecz_wlidze+=1
