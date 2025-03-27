@@ -15,7 +15,7 @@ sa = gspread.service_account(filename=resource_path("service_account.json"))
 sh = sa.open("Wyniki statystyk")
 bartek_arkusz = sh.worksheet("bartek")
 
-def ostatnie(EID, T1ID, T2ID):
+def ostatnie(liga_Ccd,liga_Scd,mecz_dnia, T1ID, T2ID):
     for druzyna1 in mecz_dnia['T1']:
         url_ostatnie= "https://livescore6.p.rapidapi.com/matches/v2/list-by-league"
         querystring_ostatnie = {"Category":"soccer","Ccd":f"{liga_Ccd}","Scd":f"{liga_Scd}","Timezone":"-7"}
@@ -27,7 +27,19 @@ def ostatnie(EID, T1ID, T2ID):
         statystyki = json.loads(resposne_ostatnie.text)
         for dana_liga in statystyki['Stages']:
             for mecz in dana_liga['Events']:
-                if id_meczu == mecz['Eid']:
-                    pass
-                if mecz['t1'] == mecz_dnia['T1'] or mecz['t1'] == mecz_dnia['T2']:
-                    mecz_sprawdzenie = 
+                mecz_wlidze=0
+                if mecz_dnia == mecz['Eid']:
+                    mecz_wlidze-=1
+                    licznik_T1=5
+                    licznik_T1=5 
+                    for i in dana_liga['Events']:
+                        mecz_wlidze-=1
+                        if T1ID == mecz_dnia['T1'] or T1ID == mecz_dnia['T2']:
+                            licznik_T1 -=1
+                            
+
+                        if T2ID == mecz_dnia['T1'] or T2ID == mecz_dnia['T2']:
+                            licznik_T2 -=1
+
+                else:
+                    mecz_wlidze+=1

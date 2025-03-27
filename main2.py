@@ -3,6 +3,7 @@ import os
 import sys
 import requests
 import gspread
+import ostatnie
 
 def resource_path(relpath):
     try:
@@ -34,4 +35,8 @@ def ogolne(data):
             for liga in ligi['Events']:
                 for mecz_dnia in liga:
                     id_meczu=mecz_dnia['Eid']
-                    
+                    T1ID = mecz_dnia['T1'][0]['ID']
+                    T2ID = mecz_dnia['T2'][0]['ID']
+                    ostatnie(liga_Ccd,liga_Scd,id_meczu,T1ID,T2ID)        
+
+            
