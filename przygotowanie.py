@@ -11,12 +11,20 @@
 
 #https://rapidapi.com/apidojo/api/livescore6/playground/apiendpoint_675a0842-5902-450e-abbb-1f1ffc64a45b
 
-###
+### 
 
 ### requesty do kartek w ostatnim meczu(kto dostał najlepiej pozycja(wplyw na agresje w grze defensywnej i ofensywnej))
 
 
 # https://rapidapi.com/apidojo/api/livescore6/playground/apiendpoint_842ae99e-29bc-43af-a873-9c382888ed3a(zeby nie marnowac requestow trzeba to wrzucic w trakcie szukania ostanich meczow(ostanie 2), w pierwszym obiegu > Incs>ktora polowa>ktory incydent>IT(numer incydentu pozniej wypisze jakie incydenty nas interesuja))
 
+
+###
+
+
+
+###
+
+#% wygranych polów srednia
 
 ###

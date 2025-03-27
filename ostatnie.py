@@ -20,8 +20,8 @@ def ostatnie_check(liga_Ccd,liga_Scd,mecz_dnia, T1ID, T2ID):
         url_ostatnie= "https://livescore6.p.rapidapi.com/matches/v2/list-by-league"
         querystring_ostatnie = {"Category":"soccer","Ccd":f"{liga_Ccd}","Scd":f"{liga_Scd}","Timezone":"-7"}
         headers_ostatnie = {
-            "x-rapidapi-key": "fb7333cf2fmsh68563e68f422bcep1a2071jsncb99c4caaf88",
-            "x-rapidapi-host": "livescore6.p.rapidapi.com"
+            "x-rapidapi-key": "330f4d824fmshc955406d10d09cfp150f9ejsn3d0799cfeccb",
+	        "x-rapidapi-host": "livescore6.p.rapidapi.com"
         }   
         resposne_ostatnie = requests.get(url_ostatnie, headers=headers_ostatnie, params=querystring_ostatnie)
         statystyki = json.loads(resposne_ostatnie.text)
